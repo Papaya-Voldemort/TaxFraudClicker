@@ -1,10 +1,12 @@
 import { autoClickersData } from '../data/autoClickers.js';
+import { marsAutoClickersData } from '../data/marsData.js';
 
 export class AutoClickerManager {
     constructor(gameState, ui) {
         this.gameState = gameState;
         this.ui = ui;
         this.autoClickers = autoClickersData;
+        this.marsAutoClickers = marsAutoClickersData;
         this.autoClickerElements = new Map();
     }
 
@@ -12,7 +14,9 @@ export class AutoClickerManager {
         const container = document.getElementById('auto-clickers-container');
         container.innerHTML = '';
 
-        this.autoClickers.forEach(autoClicker => {
+        const clickersToShow = this.gameState.currentPlanet === 'earth' ? this.autoClickers : this.marsAutoClickers;
+
+        clickersToShow.forEach(autoClicker => {
             const card = this.createAutoClickerCard(autoClicker);
             container.appendChild(card);
             this.autoClickerElements.set(autoClicker.id, card);
@@ -25,6 +29,8 @@ export class AutoClickerManager {
         
         const count = this.gameState.getAutoClickerCount(autoClicker.id);
         const currentCost = this.calculateCost(autoClicker.baseCost, count);
+        const perSecond = autoClicker.moneyPerSecond || autoClicker.creditsPerSecond;
+        const currencyIcon = this.gameState.currentPlanet === 'earth' ? '💰' : '🔴';
         
         card.innerHTML = `
             <div class="auto-clicker-header">
@@ -34,9 +40,9 @@ export class AutoClickerManager {
             <div class="auto-clicker-count">Owned: <span id="count-${autoClicker.id}">${count}</span></div>
             <div class="auto-clicker-description">${autoClicker.description}</div>
             <div class="auto-clicker-stats">
-                <span class="auto-clicker-cost">💰 <span id="cost-${autoClicker.id}">${this.ui.formatNumber(currentCost)}</span></span>
+                <span class="auto-clicker-cost">${currencyIcon} <span id="cost-${autoClicker.id}">${this.ui.formatNumber(currentCost)}</span></span>
                 <button class="auto-clicker-button" data-auto-clicker-id="${autoClicker.id}">
-                    Buy (+${this.ui.formatNumber(autoClicker.moneyPerSecond)}/s)
+                    Buy (+${this.ui.formatNumber(perSecond)}/s)
                 </button>
             </div>
         `;
@@ -49,7 +55,8 @@ export class AutoClickerManager {
     }
 
     purchaseAutoClicker(autoClickerId) {
-        const autoClicker = this.autoClickers.find(ac => ac.id === autoClickerId);
+        const clickersToSearch = this.gameState.currentPlanet === 'earth' ? this.autoClickers : this.marsAutoClickers;
+        const autoClicker = clickersToSearch.find(ac => ac.id === autoClickerId);
         if (!autoClicker) return;
 
         const count = this.gameState.getAutoClickerCount(autoClickerId);
@@ -63,13 +70,15 @@ export class AutoClickerManager {
         // Purchase auto-clicker
         if (this.gameState.spendMoney(cost)) {
             this.gameState.addAutoClicker(autoClickerId);
-            this.gameState.increaseMoneyPerSecond(autoClicker.moneyPerSecond);
+            const perSecond = autoClicker.moneyPerSecond || autoClicker.creditsPerSecond;
+            this.gameState.increaseMoneyPerSecond(perSecond);
             this.updateAutoClickerCard(autoClickerId);
         }
     }
 
     updateAutoClickerCard(autoClickerId) {
-        const autoClicker = this.autoClickers.find(ac => ac.id === autoClickerId);
+        const clickersToSearch = this.gameState.currentPlanet === 'earth' ? this.autoClickers : this.marsAutoClickers;
+        const autoClicker = clickersToSearch.find(ac => ac.id === autoClickerId);
         if (!autoClicker) return;
 
         const count = this.gameState.getAutoClickerCount(autoClickerId);
@@ -83,7 +92,9 @@ export class AutoClickerManager {
     }
 
     updateAutoClickerButtons() {
-        this.autoClickers.forEach(autoClicker => {
+        const clickersToCheck = this.gameState.currentPlanet === 'earth' ? this.autoClickers : this.marsAutoClickers;
+        
+        clickersToCheck.forEach(autoClicker => {
             const card = this.autoClickerElements.get(autoClicker.id);
             if (!card) return;
 
@@ -98,8 +109,11 @@ export class AutoClickerManager {
     }
 
     generatePassiveIncome(deltaTime) {
-        if (this.gameState.moneyPerSecond > 0) {
-            const income = this.gameState.moneyPerSecond * deltaTime;
+        const perSecond = this.gameState.currentPlanet === 'earth' ? 
+            this.gameState.moneyPerSecond : this.gameState.marsCreditsPerSecond;
+            
+        if (perSecond > 0) {
+            const income = perSecond * deltaTime;
             this.gameState.addMoney(income);
         }
     }

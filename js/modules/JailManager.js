@@ -1,4 +1,5 @@
 import { jailUpgradesData, jailAutoClickersData } from '../data/jailData.js';
+import { marsJailUpgradesData, marsJailAutoClickersData } from '../data/marsData.js';
 
 export class JailManager {
     constructor(gameState, ui) {
@@ -12,6 +13,8 @@ export class JailManager {
         this.freedomNeeded = 500; // Much higher base requirement
         this.jailUpgrades = jailUpgradesData;
         this.jailAutoClickers = jailAutoClickersData;
+        this.marsJailUpgrades = marsJailUpgradesData;
+        this.marsJailAutoClickers = marsJailAutoClickersData;
         this.purchasedJailUpgrades = new Set();
         this.jailAutoClickerCounts = new Map();
         this.lastCheckTime = Date.now();
@@ -20,6 +23,12 @@ export class JailManager {
 
     checkIRSDetection() {
         if (this.isInJail) return;
+        
+        // Only check on Earth - Mars has different detection
+        if (this.gameState.currentPlanet === 'mars') {
+            this.checkMarsAuthorityDetection();
+            return;
+        }
         
         const currentTime = Date.now();
         if (currentTime - this.lastCheckTime < 1000) return; // Check once per second
@@ -44,24 +53,62 @@ export class JailManager {
         }
     }
 
+    checkMarsAuthorityDetection() {
+        const currentTime = Date.now();
+        if (currentTime - this.lastCheckTime < 1000) return;
+        this.lastCheckTime = currentTime;
+
+        const credits = this.gameState.marsCredits;
+        
+        // Mars has stricter enforcement - frontier law
+        let detectionChance = (credits / 50) * 0.00002; // Twice as likely
+        
+        if (credits > 50000) {
+            detectionChance += (credits / 50000) * 0.00004;
+        }
+        
+        detectionChance = Math.min(detectionChance, 0.002); // 2x cap
+        
+        if (Math.random() < detectionChance) {
+            this.sendToJail();
+        }
+    }
+
     sendToJail() {
         if (this.isInJail) return;
         
         this.isInJail = true;
-        this.timesJailed++;
-        this.gameState.timesJailed = this.timesJailed;
+        const onMars = this.gameState.currentPlanet === 'mars';
         
-        // Unlock first bust achievement
-        if (this.timesJailed === 1 && window.game && window.game.achievementManager) {
+        // Track jail counts separately per planet
+        if (onMars) {
+            this.gameState.marsTimesJailed++;
+        } else {
+            this.timesJailed++;
+            this.gameState.timesJailed = this.timesJailed;
+        }
+        
+        // Get the appropriate jail count for this planet
+        const currentJailCount = onMars ? this.gameState.marsTimesJailed : this.timesJailed;
+        
+        // Unlock first bust achievement (only for Earth)
+        if (!onMars && this.timesJailed === 1 && window.game && window.game.achievementManager) {
             window.game.achievementManager.manualUnlock('first_bust');
         }
         
-        // Confiscate all money
-        const confiscatedMoney = this.gameState.money;
-        this.gameState.money = 0;
+        // Confiscate all money/credits
+        let confiscated;
+        if (onMars) {
+            confiscated = this.gameState.marsCredits;
+            this.gameState.marsCredits = 0;
+        } else {
+            confiscated = this.gameState.money;
+            this.gameState.money = 0;
+        }
         
         // Calculate freedom needed (increases each time, starts at 500)
-        this.freedomNeeded = 500 * Math.pow(2, this.timesJailed - 1);
+        // Use planet-specific jail count for fair progression
+        this.freedomNeeded = 500 * Math.pow(2, currentJailCount - 1);
         
         // Reset jail progress
         this.freedom = 0;
@@ -70,29 +117,44 @@ export class JailManager {
         this.purchasedJailUpgrades.clear();
         this.jailAutoClickerCounts.clear();
         
-        // Show IRS bust notification
-        this.showBustNotification(confiscatedMoney);
+        // Show bust notification
+        this.showBustNotification(confiscated, onMars);
         
         // Transition to jail UI
         setTimeout(() => {
-            this.showJailUI();
+            this.showJailUI(onMars);
         }, 2000);
     }
 
-    showBustNotification(confiscatedMoney) {
+    showBustNotification(confiscatedAmount, onMars) {
         const notification = document.createElement('div');
-        notification.className = 'irs-bust-notification';
-        notification.innerHTML = `
-            <div class="bust-header">🚨 IRS RAID! 🚨</div>
-            <div class="bust-body">
-                <div class="bust-icon">👮‍♂️</div>
-                <div class="bust-info">
-                    <div class="bust-message">You've been caught!</div>
-                    <div class="bust-confiscated">Confiscated: $${this.ui.formatNumber(confiscatedMoney)}</div>
-                    <div class="bust-sentence">Sentence: ${Math.ceil(this.freedomNeeded)} freedom points to earn</div>
+        notification.className = onMars ? 'mars-bust-notification' : 'irs-bust-notification';
+        
+        if (onMars) {
+            notification.innerHTML = `
+                <div class="bust-header">🚨 COLONY SECURITY RAID! 🚨</div>
+                <div class="bust-body">
+                    <div class="bust-icon">👮‍♀️🚀</div>
+                    <div class="bust-info">
+                        <div class="bust-message">Caught violating Mars commerce laws!</div>
+                        <div class="bust-confiscated">Confiscated: 🔴 ${this.ui.formatNumber(confiscatedAmount)} credits</div>
+                        <div class="bust-sentence">Detention: ${Math.ceil(this.freedomNeeded)} freedom points to earn</div>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        } else {
+            notification.innerHTML = `
+                <div class="bust-header">🚨 IRS RAID! 🚨</div>
+                <div class="bust-body">
+                    <div class="bust-icon">👮‍♂️</div>
+                    <div class="bust-info">
+                        <div class="bust-message">You've been caught!</div>
+                        <div class="bust-confiscated">Confiscated: $${this.ui.formatNumber(confiscatedAmount)}</div>
+                        <div class="bust-sentence">Sentence: ${Math.ceil(this.freedomNeeded)} freedom points to earn</div>
+                    </div>
+                </div>
+            `;
+        }
         
         document.body.appendChild(notification);
         
@@ -104,9 +166,22 @@ export class JailManager {
         }, 4000);
     }
 
-    showJailUI() {
+    showJailUI(onMars = false) {
         const mainGame = document.getElementById('main-game');
         const jailGame = document.getElementById('jail-game');
+        
+        // Update jail header for Mars
+        if (onMars) {
+            const jailHeader = jailGame.querySelector('.jail-header h1');
+            const jailDisclaimer = jailGame.querySelector('.jail-disclaimer');
+            jailHeader.innerHTML = '⛓️ MARS COLONY DETENTION ⛓️';
+            jailDisclaimer.textContent = '🚨 Violating Mars commerce regulations! 🚨';
+        } else {
+            const jailHeader = jailGame.querySelector('.jail-header h1');
+            const jailDisclaimer = jailGame.querySelector('.jail-disclaimer');
+            jailHeader.innerHTML = '⛓️ FEDERAL PRISON ⛓️';
+            jailDisclaimer.textContent = '🚨 You\'ve been caught by the IRS! 🚨';
+        }
         
         mainGame.classList.add('transitioning-out');
         
@@ -115,8 +190,8 @@ export class JailManager {
             jailGame.style.display = 'block';
             
             // Initialize jail UI
-            this.renderJailUpgrades();
-            this.renderJailAutoClickers();
+            this.renderJailUpgrades(onMars);
+            this.renderJailAutoClickers(onMars);
             this.updateJailUI();
             
             setTimeout(() => {
@@ -215,18 +290,24 @@ export class JailManager {
         document.getElementById('jail-freedom-needed').textContent = this.ui.formatNumber(Math.ceil(this.freedomNeeded));
         document.getElementById('jail-per-click-display').textContent = this.ui.formatNumber(this.freedomPerClick);
         document.getElementById('jail-per-second-display').textContent = this.ui.formatNumber(this.freedomPerSecond);
-        document.getElementById('jail-times-jailed').textContent = this.timesJailed;
+        
+        // Show appropriate jail count based on current planet
+        const onMars = this.gameState.currentPlanet === 'mars';
+        const jailCount = onMars ? this.gameState.marsTimesJailed : this.timesJailed;
+        document.getElementById('jail-times-jailed').textContent = jailCount;
         
         // Update progress bar
         const percentage = Math.min((this.freedom / this.freedomNeeded) * 100, 100);
         document.getElementById('jail-progress-bar').style.width = percentage + '%';
     }
 
-    renderJailUpgrades() {
+    renderJailUpgrades(onMars = false) {
         const container = document.getElementById('jail-upgrades-container');
         container.innerHTML = '';
         
-        this.jailUpgrades.forEach(upgrade => {
+        const upgradesToShow = onMars ? this.marsJailUpgrades : this.jailUpgrades;
+        
+        upgradesToShow.forEach(upgrade => {
             const card = this.createJailUpgradeCard(upgrade);
             container.appendChild(card);
         });
@@ -267,11 +348,13 @@ export class JailManager {
         }
     }
 
-    renderJailAutoClickers() {
+    renderJailAutoClickers(onMars = false) {
         const container = document.getElementById('jail-auto-clickers-container');
         container.innerHTML = '';
         
-        this.jailAutoClickers.forEach(autoClicker => {
+        const autoClickersToShow = onMars ? this.marsJailAutoClickers : this.jailAutoClickers;
+        
+        autoClickersToShow.forEach(autoClicker => {
             const card = this.createJailAutoClickerCard(autoClicker);
             container.appendChild(card);
         });

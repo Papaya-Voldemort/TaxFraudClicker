@@ -1,10 +1,12 @@
 import { upgradesData } from '../data/upgrades.js';
+import { marsUpgradesData } from '../data/marsData.js';
 
 export class UpgradeManager {
     constructor(gameState, ui) {
         this.gameState = gameState;
         this.ui = ui;
         this.upgrades = upgradesData;
+        this.marsUpgrades = marsUpgradesData;
         this.upgradeElements = new Map();
     }
 
@@ -12,11 +14,26 @@ export class UpgradeManager {
         const container = document.getElementById('upgrades-container');
         container.innerHTML = '';
 
-        this.upgrades.forEach(upgrade => {
-            const card = this.createUpgradeCard(upgrade);
-            container.appendChild(card);
-            this.upgradeElements.set(upgrade.id, card);
+        const upgradesToShow = this.gameState.currentPlanet === 'earth' ? this.upgrades : this.marsUpgrades;
+
+        upgradesToShow.forEach(upgrade => {
+            // Check if upgrade should be visible
+            if (this.isUpgradeUnlocked(upgrade)) {
+                const card = this.createUpgradeCard(upgrade);
+                container.appendChild(card);
+                this.upgradeElements.set(upgrade.id, card);
+            }
         });
+    }
+
+    isUpgradeUnlocked(upgrade) {
+        // If no requiresPrevious, it's always unlocked
+        if (!upgrade.requiresPrevious) {
+            return true;
+        }
+        
+        // Check if the previous upgrade has been purchased
+        return this.gameState.hasUpgrade(upgrade.requiresPrevious);
     }
 
     createUpgradeCard(upgrade) {
@@ -43,8 +60,14 @@ export class UpgradeManager {
     }
 
     purchaseUpgrade(upgradeId) {
-        const upgrade = this.upgrades.find(u => u.id === upgradeId);
+        const upgradesToSearch = this.gameState.currentPlanet === 'earth' ? this.upgrades : this.marsUpgrades;
+        const upgrade = upgradesToSearch.find(u => u.id === upgradeId);
         if (!upgrade) return;
+
+        // Check if unlocked
+        if (!this.isUpgradeUnlocked(upgrade)) {
+            return;
+        }
 
         // Check if already purchased
         if (this.gameState.hasUpgrade(upgradeId)) {
@@ -61,6 +84,8 @@ export class UpgradeManager {
             this.gameState.purchaseUpgrade(upgradeId);
             this.applyUpgradeEffect(upgrade);
             this.updateUpgradeCard(upgradeId);
+            // Re-render to show newly unlocked upgrades
+            this.renderUpgrades();
         }
     }
 
@@ -82,7 +107,9 @@ export class UpgradeManager {
     }
 
     updateUpgradeButtons() {
-        this.upgrades.forEach(upgrade => {
+        const upgradesToCheck = this.gameState.currentPlanet === 'earth' ? this.upgrades : this.marsUpgrades;
+        
+        upgradesToCheck.forEach(upgrade => {
             const card = this.upgradeElements.get(upgrade.id);
             if (!card) return;
 

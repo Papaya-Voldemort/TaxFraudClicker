@@ -78,5 +78,45 @@ export const autoClickersData = [
         description: 'Controls the strings from behind the scenes.',
         baseCost: 75000000000,
         moneyPerSecond: 1600000
+    },
+    {
+        id: 'auto_11',
+        name: 'AI Trading Network',
+        icon: '🧠',
+        description: 'Algorithmic wealth generation.',
+        baseCost: 1000000000000,
+        moneyPerSecond: 10000000
+    },
+    {
+        id: 'auto_12',
+        name: 'Quantum Hedge Fund',
+        icon: '⚛️',
+        description: 'Exploits quantum fluctuations for profit.',
+        baseCost: 15000000000000,
+        moneyPerSecond: 65000000
+    },
+    {
+        id: 'auto_13',
+        name: 'Time Bank',
+        icon: '⌛',
+        description: 'Literally makes money over time.',
+        baseCost: 250000000000000,
+        moneyPerSecond: 430000000
+    },
+    {
+        id: 'auto_14',
+        name: 'Reality Distortion Field',
+        icon: '✨',
+        description: 'Bends economics to your will.',
+        baseCost: 4000000000000000,
+        moneyPerSecond: 2900000000
+    },
+    {
+        id: 'auto_15',
+        name: 'Universal Bank',
+        icon: '🏦',
+        description: 'Banking on a cosmic scale.',
+        baseCost: 70000000000000000,
+        moneyPerSecond: 21000000000
     }
 ];
