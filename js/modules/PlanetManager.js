@@ -1,5 +1,5 @@
 import { planetsData, planetOrder } from '../data/planetsData.js';
-import { upgrades } from '../data/upgrades.js';
+import { upgradesData } from '../data/upgrades.js';
 import { marsUpgradesData } from '../data/marsData.js';
 import { 
     mercuryUpgradesData, venusUpgradesData, jupiterUpgradesData,
@@ -32,7 +32,7 @@ export class PlanetManager {
         
         // Map planet IDs to their upgrades/auto-clickers
         this.planetUpgrades = {
-            earth: upgrades,
+            earth: upgradesData,
             mercury: mercuryUpgradesData,
             venus: venusUpgradesData,
             mars: marsUpgradesData,
