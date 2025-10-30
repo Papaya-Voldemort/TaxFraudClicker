@@ -3,6 +3,7 @@ import { UI } from './modules/UI.js';
 import { ClickHandler } from './modules/ClickHandler.js';
 import { UpgradeManager } from './modules/UpgradeManager.js';
 import { AutoClickerManager } from './modules/AutoClickerManager.js';
+import { AutoClickerUpgradeManager } from './modules/AutoClickerUpgradeManager.js';
 import { SaveManager } from './modules/SaveManager.js';
 import { TabManager } from './modules/TabManager.js';
 import { AchievementManager } from './modules/AchievementManager.js';
@@ -15,6 +16,7 @@ class Game {
         this.clickHandler = new ClickHandler(this.gameState, this.ui);
         this.upgradeManager = new UpgradeManager(this.gameState, this.ui);
         this.autoClickerManager = new AutoClickerManager(this.gameState, this.ui);
+        this.autoClickerUpgradeManager = new AutoClickerUpgradeManager(this.gameState, this.ui);
         this.jailManager = new JailManager(this.gameState, this.ui);
         this.saveManager = new SaveManager(this.gameState, this.jailManager);
         this.tabManager = new TabManager();
@@ -35,6 +37,7 @@ class Game {
         this.ui.updateAll(this.gameState);
         this.upgradeManager.renderUpgrades();
         this.autoClickerManager.renderAutoClickers();
+        this.autoClickerUpgradeManager.renderUpgrades();
         this.updateAchievementProgress();
         
         // Set up event listeners
@@ -72,6 +75,7 @@ class Game {
                 this.ui.updateAll(this.gameState);
                 this.upgradeManager.renderUpgrades();
                 this.autoClickerManager.renderAutoClickers();
+                this.autoClickerUpgradeManager.renderUpgrades();
                 alert('Game loaded successfully!');
             } else {
                 alert('No save file found!');
@@ -104,6 +108,7 @@ class Game {
                         this.ui.updateAll(this.gameState);
                         this.upgradeManager.renderUpgrades();
                         this.autoClickerManager.renderAutoClickers();
+                        this.autoClickerUpgradeManager.renderUpgrades();
                         alert('Save imported successfully!');
                     } catch (error) {
                         alert('Invalid save file!');
@@ -139,6 +144,15 @@ class Game {
             if (e.target.classList.contains('auto-clicker-button')) {
                 const autoClickerId = e.target.dataset.autoClickerId;
                 this.autoClickerManager.purchaseAutoClicker(autoClickerId);
+                this.achievementManager.checkAchievements();
+            }
+        });
+
+        // Auto-clicker upgrade buttons (delegated)
+        document.getElementById('ac-upgrades-container').addEventListener('click', (e) => {
+            if (e.target.classList.contains('upgrade-button')) {
+                const upgradeId = e.target.dataset.acUpgradeId;
+                this.autoClickerUpgradeManager.purchaseUpgrade(upgradeId);
                 this.achievementManager.checkAchievements();
             }
         });
@@ -189,6 +203,7 @@ class Game {
                 this.ui.updateAll(this.gameState);
                 this.upgradeManager.updateUpgradeButtons();
                 this.autoClickerManager.updateAutoClickerButtons();
+                this.autoClickerUpgradeManager.updateUpgradeButtons();
                 this.achievementManager.checkAchievements();
                 this.achievementManager.updateAllProgressBars();
                 this.updateSettings();

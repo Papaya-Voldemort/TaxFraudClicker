@@ -7,6 +7,8 @@ export class GameState {
         this.totalMoneyEarned = 0;
         this.purchasedUpgrades = new Set();
         this.autoClickers = new Map(); // Map of autoClickerId -> count
+        this.purchasedAutoClickerUpgrades = new Set();
+        this.autoClickerMultiplier = 1;
         this.unlockedAchievements = new Set();
         this.timesJailed = 0;
     }
@@ -33,7 +35,23 @@ export class GameState {
     }
 
     increaseMoneyPerSecond(amount) {
-        this.moneyPerSecond += amount;
+        this.moneyPerSecond += amount * this.autoClickerMultiplier;
+    }
+
+    multiplyAutoClickerEfficiency(multiplier) {
+        // Recalculate moneyPerSecond based on new multiplier
+        const oldMultiplier = this.autoClickerMultiplier;
+        this.autoClickerMultiplier *= multiplier;
+        const ratio = this.autoClickerMultiplier / oldMultiplier;
+        this.moneyPerSecond *= ratio;
+    }
+
+    purchaseAutoClickerUpgrade(upgradeId) {
+        this.purchasedAutoClickerUpgrades.add(upgradeId);
+    }
+
+    hasAutoClickerUpgrade(upgradeId) {
+        return this.purchasedAutoClickerUpgrades.has(upgradeId);
     }
 
     purchaseUpgrade(upgradeId) {
@@ -66,6 +84,8 @@ export class GameState {
             totalMoneyEarned: this.totalMoneyEarned,
             purchasedUpgrades: Array.from(this.purchasedUpgrades),
             autoClickers: Array.from(this.autoClickers.entries()),
+            purchasedAutoClickerUpgrades: Array.from(this.purchasedAutoClickerUpgrades),
+            autoClickerMultiplier: this.autoClickerMultiplier,
             unlockedAchievements: Array.from(this.unlockedAchievements),
             timesJailed: this.timesJailed
         };
@@ -79,6 +99,8 @@ export class GameState {
         this.totalMoneyEarned = data.totalMoneyEarned || 0;
         this.purchasedUpgrades = new Set(data.purchasedUpgrades || []);
         this.autoClickers = new Map(data.autoClickers || []);
+        this.purchasedAutoClickerUpgrades = new Set(data.purchasedAutoClickerUpgrades || []);
+        this.autoClickerMultiplier = data.autoClickerMultiplier || 1;
         this.unlockedAchievements = new Set(data.unlockedAchievements || []);
         this.timesJailed = data.timesJailed || 0;
     }
