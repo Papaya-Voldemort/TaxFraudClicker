@@ -83,7 +83,7 @@ export const uranusJailAutoClickersData = [
 // Neptune Jail - Deep Sea Prison
 export const neptuneJailUpgradesData = [
     { id: 'neptune_jail_1', name: 'Deep Dive Suit', icon: '🤿', description: 'Withstand pressure. +10 freedom per click.', cost: 250, effect: { type: 'clickBonus', value: 10 } },
-    { id: 'neptune_jail_2', name: 'Wind Surfing', icon: '💨', description: '2,100 km/h escape. +22 freedom per click.', cost: 1000, effect: { type: 'clickBonus', value: 22 } },
+    { id: 'neptune_jail_2', name: 'Windsurfing', icon: '💨', description: '2,100 km/h escape. +22 freedom per click.', cost: 1000, effect: { type: 'clickBonus', value: 22 } },
     { id: 'neptune_jail_3', name: 'Triton Geyser Boost', icon: '💧', description: 'Nitrogen power. +52 freedom per click.', cost: 4000, effect: { type: 'clickBonus', value: 52 } },
     { id: 'neptune_jail_4', name: 'Dark Spot Camouflage', icon: '🌀', description: 'Hide in storm. +130 freedom per click.', cost: 16000, effect: { type: 'clickBonus', value: 130 } },
     { id: 'neptune_jail_5', name: 'Ocean God Blessing', icon: '🔱', description: 'Divine intervention. +325 freedom per click.', cost: 64000, effect: { type: 'clickBonus', value: 325 } }
