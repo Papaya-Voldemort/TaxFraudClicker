@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Fraud Clicker - Educational Satire</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="game-container">
+        <div id="main-game">
+        <header class="game-header">
+            <h1>🏦 Tax Fraud Clicker 🏦</h1>
+            <p class="disclaimer">⚠️ Educational Satire - Don't Actually Commit Tax Fraud! ⚠️</p>
+        </header>
+
+        <main class="game-main">
+            <section class="stats-section">
+                <div class="stat-card">
+                    <h2>💰 Hidden Money</h2>
+                    <div id="money-display" class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                    <h2>📈 Money per Click</h2>
+                    <div id="per-click-display" class="stat-value">1</div>
+                </div>
+                <div class="stat-card">
+                    <h2>⏱️ Money per Second</h2>
+                    <div id="per-second-display" class="stat-value">0</div>
+                </div>
+            </section>
+
+            <section class="clicker-section">
+                <button id="main-clicker" class="main-clicker">
+                    <span class="clicker-icon">🏛️</span>
+                    <span class="clicker-text">Hide Money from IRS</span>
+                </button>
+                <div id="click-particles"></div>
+            </section>
+
+            <nav class="tabs-nav">
+                <button class="tab-button active" data-tab="upgrades">
+                    <span class="tab-icon">🔧</span>
+                    <span class="tab-label">Upgrades</span>
+                </button>
+                <button class="tab-button" data-tab="auto-clickers">
+                    <span class="tab-icon">🤖</span>
+                    <span class="tab-label">Auto-Clickers</span>
+                </button>
+                <button class="tab-button" data-tab="achievements">
+                    <span class="tab-icon">🏆</span>
+                    <span class="tab-label">Achievements</span>
+                    <span class="achievement-counter" id="achievement-counter">0/0</span>
+                </button>
+                <button class="tab-button" data-tab="settings">
+                    <span class="tab-icon">⚙️</span>
+                    <span class="tab-label">Settings</span>
+                </button>
+            </nav>
+
+            <div class="tabs-content">
+                <section id="tab-upgrades" class="tab-panel active">
+                    <h2>🔧 "Business Strategies"</h2>
+                    <div id="upgrades-container" class="upgrades-grid"></div>
+                </section>
+
+                <section id="tab-auto-clickers" class="tab-panel">
+                    <h2>🤖 Automated "Tax Planning"</h2>
+                    <div id="auto-clickers-container" class="auto-clickers-grid"></div>
+                </section>
+
+                <section id="tab-achievements" class="tab-panel">
+                    <h2>🏆 Achievements</h2>
+                    <div class="achievements-progress">
+                        <div class="progress-text">
+                            <span id="achievements-unlocked">0</span> / <span id="achievements-total">0</span> Unlocked
+                        </div>
+                        <div class="progress-bar-container">
+                            <div id="achievements-progress-bar" class="progress-bar"></div>
+                        </div>
+                    </div>
+                    <div id="achievements-container" class="achievements-grid"></div>
+                </section>
+
+                <section id="tab-settings" class="tab-panel">
+                    <h2>⚙️ Settings</h2>
+                    <div class="settings-content">
+                        <div class="settings-group">
+                            <h3>Game Data</h3>
+                            <button id="save-button" class="settings-button">💾 Save Game</button>
+                            <button id="load-button" class="settings-button">📂 Load Game</button>
+                            <button id="export-button" class="settings-button">📤 Export Save</button>
+                            <button id="import-button" class="settings-button">📥 Import Save</button>
+                        </div>
+                        <div class="settings-group">
+                            <h3>Statistics</h3>
+                            <div class="stat-row">
+                                <span>Total Clicks:</span>
+                                <span id="stat-total-clicks">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span>Total Money Earned:</span>
+                                <span id="stat-total-money">0</span>
+                            </div>
+                        </div>
+                        <div class="settings-group">
+                            <h3>Danger Zone</h3>
+                            <button id="reset-game-button" class="settings-button danger">🗑️ Reset Game</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <footer class="game-footer">
+            <p>Remember: Pay your taxes in real life! 🇺🇸</p>
+        </footer>
+        </div>
+
+        <!-- Jail Game UI -->
+        <div id="jail-game" style="display: none;">
+            <header class="jail-header">
+                <h1>⛓️ FEDERAL PRISON ⛓️</h1>
+                <p class="jail-disclaimer">🚨 You've been caught by the IRS! 🚨</p>
+            </header>
+
+            <main class="jail-main">
+                <section class="jail-stats-section">
+                    <div class="stat-card jail-stat-card">
+                        <h2>🆓 Freedom Points</h2>
+                        <div id="jail-freedom-display" class="stat-value">0</div>
+                        <div class="jail-needed">Need: <span id="jail-freedom-needed">100</span></div>
+                    </div>
+                    <div class="stat-card jail-stat-card">
+                        <h2>✊ Per Click</h2>
+                        <div id="jail-per-click-display" class="stat-value">1</div>
+                    </div>
+                    <div class="stat-card jail-stat-card">
+                        <h2>⏱️ Per Second</h2>
+                        <div id="jail-per-second-display" class="stat-value">0</div>
+                    </div>
+                    <div class="stat-card jail-stat-card">
+                        <h2>🔒 Times Jailed</h2>
+                        <div id="jail-times-jailed" class="stat-value">0</div>
+                    </div>
+                </section>
+
+                <section class="jail-progress-section">
+                    <div class="jail-progress-container">
+                        <div id="jail-progress-bar" class="jail-progress-bar"></div>
+                    </div>
+                </section>
+
+                <section class="jail-clicker-section">
+                    <button id="jail-clicker" class="jail-clicker">
+                        <span class="jail-clicker-icon">⚖️</span>
+                        <span class="jail-clicker-text">Earn Your Freedom</span>
+                    </button>
+                </section>
+
+                <section class="jail-content">
+                    <div class="jail-upgrades-section">
+                        <h2>🛠️ Reduce Sentence</h2>
+                        <div id="jail-upgrades-container" class="jail-upgrades-grid"></div>
+                    </div>
+
+                    <div class="jail-auto-section">
+                        <h2>👥 Get Help</h2>
+                        <div id="jail-auto-clickers-container" class="jail-auto-grid"></div>
+                    </div>
+                </section>
+            </main>
+        </div>
+        
+        <textarea id="import-textarea" style="display: none;"></textarea>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
