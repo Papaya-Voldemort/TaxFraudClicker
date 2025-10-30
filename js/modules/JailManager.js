@@ -29,7 +29,7 @@ export class JailManager {
         
         // Calculate detection chance based on money (0.001% per $1000, 100x rarer)
         // Starts at 0.001% at $1000, increases slowly
-        let detectionChance = (money / 1000) * 0.00001;
+        let detectionChance = (money / 100) * 0.00001;
         
         // Add bonus risk for very high amounts (gets slightly more common)
         if (money > 100000) {
