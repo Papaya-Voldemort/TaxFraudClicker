@@ -80,16 +80,19 @@ export class JailManager {
         this.isInJail = true;
         const onMars = this.gameState.currentPlanet === 'mars';
         
+        // Track jail counts separately per planet
         if (onMars) {
             this.gameState.marsTimesJailed++;
-            this.timesJailed = this.gameState.marsTimesJailed;
         } else {
             this.timesJailed++;
             this.gameState.timesJailed = this.timesJailed;
         }
         
-        // Unlock first bust achievement
-        if (this.timesJailed === 1 && window.game && window.game.achievementManager) {
+        // Get the appropriate jail count for this planet
+        const currentJailCount = onMars ? this.gameState.marsTimesJailed : this.timesJailed;
+        
+        // Unlock first bust achievement (only for Earth)
+        if (!onMars && this.timesJailed === 1 && window.game && window.game.achievementManager) {
             window.game.achievementManager.manualUnlock('first_bust');
         }
         
@@ -104,7 +107,8 @@ export class JailManager {
         }
         
         // Calculate freedom needed (increases each time, starts at 500)
-        this.freedomNeeded = 500 * Math.pow(2, this.timesJailed - 1);
+        // Use planet-specific jail count for fair progression
+        this.freedomNeeded = 500 * Math.pow(2, currentJailCount - 1);
         
         // Reset jail progress
         this.freedom = 0;
@@ -286,7 +290,11 @@ export class JailManager {
         document.getElementById('jail-freedom-needed').textContent = this.ui.formatNumber(Math.ceil(this.freedomNeeded));
         document.getElementById('jail-per-click-display').textContent = this.ui.formatNumber(this.freedomPerClick);
         document.getElementById('jail-per-second-display').textContent = this.ui.formatNumber(this.freedomPerSecond);
-        document.getElementById('jail-times-jailed').textContent = this.timesJailed;
+        
+        // Show appropriate jail count based on current planet
+        const onMars = this.gameState.currentPlanet === 'mars';
+        const jailCount = onMars ? this.gameState.marsTimesJailed : this.timesJailed;
+        document.getElementById('jail-times-jailed').textContent = jailCount;
         
         // Update progress bar
         const percentage = Math.min((this.freedom / this.freedomNeeded) * 100, 100);
