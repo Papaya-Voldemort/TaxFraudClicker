@@ -85,6 +85,103 @@ export const upgradesData = [
         effect: {
             type: 'clickBonus',
             value: 500
-        }
+        },
+        requiresPrevious: 'upgrade_7'
+    },
+    {
+        id: 'upgrade_9',
+        name: 'Political Connections',
+        icon: '🤝',
+        description: 'Friends in high places. +1,000 money per click.',
+        cost: 500000,
+        effect: {
+            type: 'clickBonus',
+            value: 1000
+        },
+        requiresPrevious: 'upgrade_8'
+    },
+    {
+        id: 'upgrade_10',
+        name: 'Media Empire',
+        icon: '📺',
+        description: 'Control the narrative. +2,500 money per click.',
+        cost: 1500000,
+        effect: {
+            type: 'clickBonus',
+            value: 2500
+        },
+        requiresPrevious: 'upgrade_9'
+    },
+    {
+        id: 'upgrade_11',
+        name: 'Private Island',
+        icon: '🏝️',
+        description: 'Your own tax-free paradise. +5,000 money per click.',
+        cost: 5000000,
+        effect: {
+            type: 'clickBonus',
+            value: 5000
+        },
+        requiresPrevious: 'upgrade_10'
+    },
+    {
+        id: 'upgrade_12',
+        name: 'Space Mining Rights',
+        icon: '🛸',
+        description: 'Claim asteroids for resources. +10,000 money per click.',
+        cost: 15000000,
+        effect: {
+            type: 'clickBonus',
+            value: 10000
+        },
+        requiresPrevious: 'upgrade_11'
+    },
+    {
+        id: 'upgrade_13',
+        name: 'Lunar Base Deed',
+        icon: '🌙',
+        description: 'Own property on the Moon. +25,000 money per click.',
+        cost: 50000000,
+        effect: {
+            type: 'clickBonus',
+            value: 25000
+        },
+        requiresPrevious: 'upgrade_12'
+    },
+    {
+        id: 'upgrade_14',
+        name: 'Terraforming Patents',
+        icon: '🌍',
+        description: 'Hold rights to planet modification tech. +50,000 money per click.',
+        cost: 150000000,
+        effect: {
+            type: 'clickBonus',
+            value: 50000
+        },
+        requiresPrevious: 'upgrade_13'
+    },
+    {
+        id: 'upgrade_15',
+        name: 'Interstellar Trading License',
+        icon: '🚀',
+        description: 'Trade across star systems. +100,000 money per click.',
+        cost: 500000000,
+        effect: {
+            type: 'clickBonus',
+            value: 100000
+        },
+        requiresPrevious: 'upgrade_14'
+    },
+    {
+        id: 'upgrade_16',
+        name: 'Galactic Monopoly',
+        icon: '🌌',
+        description: 'Dominate the galaxy economy. +250,000 money per click.',
+        cost: 2000000000,
+        effect: {
+            type: 'clickBonus',
+            value: 250000
+        },
+        requiresPrevious: 'upgrade_15'
     }
 ];

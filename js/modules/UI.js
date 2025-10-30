@@ -43,9 +43,15 @@ export class UI {
     }
 
     updateAll(gameState) {
-        this.updateMoney(gameState.money);
-        this.updatePerClick(gameState.moneyPerClick);
-        this.updatePerSecond(gameState.moneyPerSecond);
+        if (gameState.currentPlanet === 'earth') {
+            this.updateMoney(gameState.money);
+            this.updatePerClick(gameState.moneyPerClick);
+            this.updatePerSecond(gameState.moneyPerSecond);
+        } else {
+            this.updateMoney(gameState.marsCredits);
+            this.updatePerClick(gameState.marsCreditsPerClick);
+            this.updatePerSecond(gameState.marsCreditsPerSecond);
+        }
     }
 
     updateMoney(amount) {

@@ -86,5 +86,60 @@ export const autoClickerUpgradesData = [
             type: 'globalMultiplier',
             value: 2
         }
+    },
+    {
+        id: 'ac_upgrade_9',
+        name: 'Infinite Energy',
+        icon: '⚡',
+        description: 'Unlimited power for your operations. Doubles auto-clicker efficiency.',
+        cost: 50000000000,
+        effect: {
+            type: 'globalMultiplier',
+            value: 2
+        }
+    },
+    {
+        id: 'ac_upgrade_10',
+        name: 'Singularity Core',
+        icon: '🌀',
+        description: 'Harness a black hole\'s power. Doubles auto-clicker efficiency.',
+        cost: 500000000000,
+        effect: {
+            type: 'globalMultiplier',
+            value: 2
+        }
+    },
+    {
+        id: 'ac_upgrade_11',
+        name: 'Omniscience Network',
+        icon: '👁️',
+        description: 'Know everything, everywhere. Doubles auto-clicker efficiency.',
+        cost: 5000000000000,
+        effect: {
+            type: 'globalMultiplier',
+            value: 2
+        }
+    },
+    {
+        id: 'ac_upgrade_12',
+        name: 'Reality Rewrite',
+        icon: '🎭',
+        description: 'Redefine the rules of existence. Doubles auto-clicker efficiency.',
+        cost: 50000000000000,
+        effect: {
+            type: 'globalMultiplier',
+            value: 2
+        }
+    },
+    {
+        id: 'ac_upgrade_13',
+        name: 'Cosmic Enlightenment',
+        icon: '🌟',
+        description: 'Transcend mortal limitations. Doubles auto-clicker efficiency.',
+        cost: 500000000000000,
+        effect: {
+            type: 'globalMultiplier',
+            value: 2
+        }
     }
 ];

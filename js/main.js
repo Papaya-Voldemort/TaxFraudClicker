@@ -8,6 +8,7 @@ import { SaveManager } from './modules/SaveManager.js';
 import { TabManager } from './modules/TabManager.js';
 import { AchievementManager } from './modules/AchievementManager.js';
 import { JailManager } from './modules/JailManager.js';
+import { MarsManager } from './modules/MarsManager.js';
 
 class Game {
     constructor() {
@@ -18,6 +19,7 @@ class Game {
         this.autoClickerManager = new AutoClickerManager(this.gameState, this.ui);
         this.autoClickerUpgradeManager = new AutoClickerUpgradeManager(this.gameState, this.ui);
         this.jailManager = new JailManager(this.gameState, this.ui);
+        this.marsManager = new MarsManager(this.gameState, this.ui, this.upgradeManager, this.autoClickerManager, this.autoClickerUpgradeManager);
         this.saveManager = new SaveManager(this.gameState, this.jailManager);
         this.tabManager = new TabManager();
         this.achievementManager = new AchievementManager(this.gameState, this.ui);
@@ -32,6 +34,13 @@ class Game {
         // Initialize achievement manager
         this.achievementManager.unlockedAchievements = this.gameState.unlockedAchievements;
         this.achievementManager.init();
+        
+        // Initialize Mars if unlocked
+        if (this.gameState.marsUnlocked) {
+            this.marsManager.updatePlanetToggle();
+            this.marsManager.updateTheme(this.gameState.currentPlanet);
+            this.marsManager.updateHeader(this.gameState.currentPlanet);
+        }
         
         // Initialize UI
         this.ui.updateAll(this.gameState);
@@ -63,6 +72,15 @@ class Game {
 
         // Tab navigation
         this.tabManager.init();
+        
+        // Planet toggle (delegated event for dynamic button)
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#planet-toggle')) {
+                const newPlanet = this.gameState.currentPlanet === 'earth' ? 'mars' : 'earth';
+                this.marsManager.switchToPlanet(newPlanet);
+                this.saveManager.save();
+            }
+        });
 
         // Settings buttons
         document.getElementById('save-button').addEventListener('click', () => {
@@ -196,8 +214,13 @@ class Game {
                 // Generate passive income (only when not in jail)
                 this.autoClickerManager.generatePassiveIncome(deltaTime);
 
-                // Check for IRS detection
-                this.jailManager.checkIRSDetection();
+                // Check for IRS detection (only on Earth)
+                if (this.gameState.currentPlanet === 'earth') {
+                    this.jailManager.checkIRSDetection();
+                }
+                
+                // Check if Mars launch option should be shown
+                this.marsManager.checkAndShowLaunchOption();
 
                 // Update UI
                 this.ui.updateAll(this.gameState);

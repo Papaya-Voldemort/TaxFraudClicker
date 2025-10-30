@@ -1,10 +1,12 @@
 import { autoClickerUpgradesData } from '../data/autoClickerUpgrades.js';
+import { marsACUpgradesData } from '../data/marsData.js';
 
 export class AutoClickerUpgradeManager {
     constructor(gameState, ui) {
         this.gameState = gameState;
         this.ui = ui;
         this.upgrades = autoClickerUpgradesData;
+        this.marsUpgrades = marsACUpgradesData;
         this.upgradeElements = new Map();
     }
 
@@ -12,7 +14,9 @@ export class AutoClickerUpgradeManager {
         const container = document.getElementById('ac-upgrades-container');
         container.innerHTML = '';
 
-        this.upgrades.forEach(upgrade => {
+        const upgradesToShow = this.gameState.currentPlanet === 'earth' ? this.upgrades : this.marsUpgrades;
+
+        upgradesToShow.forEach(upgrade => {
             const card = this.createUpgradeCard(upgrade);
             container.appendChild(card);
             this.upgradeElements.set(upgrade.id, card);
@@ -24,6 +28,7 @@ export class AutoClickerUpgradeManager {
         card.className = 'upgrade-card';
         
         const isPurchased = this.gameState.hasAutoClickerUpgrade(upgrade.id);
+        const currencyIcon = this.gameState.currentPlanet === 'earth' ? '💰' : '🔴';
         
         card.innerHTML = `
             <div class="upgrade-header">
@@ -32,7 +37,7 @@ export class AutoClickerUpgradeManager {
             </div>
             <div class="upgrade-description">${upgrade.description}</div>
             <div class="upgrade-stats">
-                <span class="upgrade-cost">💰 ${this.ui.formatNumber(upgrade.cost)}</span>
+                <span class="upgrade-cost">${currencyIcon} ${this.ui.formatNumber(upgrade.cost)}</span>
                 <button class="upgrade-button" data-ac-upgrade-id="${upgrade.id}" ${isPurchased ? 'disabled' : ''}>
                     ${isPurchased ? 'Purchased' : 'Buy'}
                 </button>
@@ -43,7 +48,8 @@ export class AutoClickerUpgradeManager {
     }
 
     purchaseUpgrade(upgradeId) {
-        const upgrade = this.upgrades.find(u => u.id === upgradeId);
+        const upgradesToSearch = this.gameState.currentPlanet === 'earth' ? this.upgrades : this.marsUpgrades;
+        const upgrade = upgradesToSearch.find(u => u.id === upgradeId);
         if (!upgrade) return;
 
         // Check if already purchased
@@ -80,7 +86,9 @@ export class AutoClickerUpgradeManager {
     }
 
     updateUpgradeButtons() {
-        this.upgrades.forEach(upgrade => {
+        const upgradesToCheck = this.gameState.currentPlanet === 'earth' ? this.upgrades : this.marsUpgrades;
+        
+        upgradesToCheck.forEach(upgrade => {
             const card = this.upgradeElements.get(upgrade.id);
             if (!card) return;
 
