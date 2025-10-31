@@ -2002,3 +2002,613 @@ body::before {
 }
 
 
+
+/* Warp Menu Styles */
+.warp-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.warp-menu-container {
+    background: linear-gradient(135deg, var(--card-bg) 0%, rgba(10, 14, 26, 0.95) 100%);
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 100px rgba(255, 215, 0, 0.3);
+    border: 2px solid var(--accent-color);
+}
+
+.warp-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+}
+
+.warp-menu-header h2 {
+    color: var(--accent-color);
+    font-size: 1.8em;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+.warp-menu-close {
+    background: rgba(211, 47, 47, 0.3);
+    border: 2px solid #d32f2f;
+    color: #fff;
+    font-size: 2em;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.warp-menu-close:hover {
+    background: #d32f2f;
+    transform: rotate(90deg);
+}
+
+.warp-menu-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 15px;
+}
+
+.warp-planet-button {
+    background: linear-gradient(135deg, var(--primary-color) 0%, rgba(44, 95, 45, 0.5) 100%);
+    border: 2px solid var(--secondary-color);
+    border-radius: 15px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.warp-planet-button:hover:not(.current) {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.4);
+    border-color: var(--accent-color);
+}
+
+.warp-planet-button.current {
+    border: 3px solid var(--accent-color);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, var(--primary-color) 100%);
+}
+
+.warp-planet-icon {
+    font-size: 3em;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.warp-planet-name {
+    font-size: 1.3em;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 8px;
+    color: var(--accent-color);
+}
+
+.warp-planet-currency {
+    text-align: center;
+    font-size: 1.1em;
+    color: var(--secondary-color);
+}
+
+.current-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--accent-color);
+    color: #000;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.7em;
+    font-weight: bold;
+}
+
+.warp-menu-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, var(--primary-color), rgba(44, 95, 45, 0.8));
+    border: 2px solid var(--accent-color);
+    color: var(--text-color);
+    padding: 12px 24px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6), 0 0 30px rgba(255, 215, 0, 0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.warp-menu-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.8), 0 0 50px rgba(255, 215, 0, 0.5);
+}
+
+.warp-icon {
+    font-size: 1.5em;
+    animation: warp-pulse 2s ease-in-out infinite;
+}
+
+@keyframes warp-pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+/* Planet Unlock Button */
+.planet-unlock-button {
+    background: linear-gradient(135deg, rgba(138, 58, 58, 0.9), rgba(100, 40, 40, 0.7));
+    border: 3px solid #ff6b35;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 20px;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 107, 53, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.planet-unlock-button::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: rotate(45deg);
+    animation: unlock-shimmer 3s linear infinite;
+}
+
+@keyframes unlock-shimmer {
+    0% {
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    }
+    100% {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+    }
+}
+
+.planet-unlock-button:hover:not(:disabled) {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), 0 0 60px rgba(255, 107, 53, 0.6);
+    border-color: var(--accent-color);
+}
+
+.planet-unlock-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(0.5);
+}
+
+.planet-unlock-button.can-afford {
+    animation: unlock-ready 1s ease-in-out infinite;
+}
+
+@keyframes unlock-ready {
+    0%, 100% {
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.4);
+    }
+    50% {
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 60px rgba(255, 215, 0, 0.8);
+    }
+}
+
+.unlock-planet-icon {
+    font-size: 1.8em;
+}
+
+.unlock-planet-text {
+    font-size: 1em;
+}
+
+.unlock-planet-cost {
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+/* Planet Unlock Notification */
+.planet-unlock-notification {
+    position: fixed;
+    top: -300px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, rgba(0, 100, 0, 0.95), rgba(0, 150, 0, 0.95));
+    border: 3px solid var(--accent-color);
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 500px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 100px rgba(255, 215, 0, 0.5);
+    z-index: 10001;
+    transition: top 0.5s ease;
+}
+
+.planet-unlock-notification.show {
+    top: 100px;
+}
+
+.unlock-header {
+    font-size: 1.8em;
+    font-weight: bold;
+    text-align: center;
+    color: var(--accent-color);
+    margin-bottom: 20px;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+}
+
+.unlock-body {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.unlock-icon {
+    font-size: 4em;
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
+}
+
+.unlock-name {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: var(--accent-color);
+    margin-bottom: 10px;
+}
+
+.unlock-description {
+    font-size: 1.1em;
+    margin-bottom: 8px;
+}
+
+.unlock-hint {
+    font-size: 0.9em;
+    font-style: italic;
+    opacity: 0.8;
+}
+
+/* Mini-Game Styles */
+.mini-game-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.mini-game-container {
+    background: linear-gradient(135deg, var(--card-bg), rgba(10, 14, 26, 0.95));
+    border: 3px solid var(--accent-color);
+    border-radius: 25px;
+    padding: 30px;
+    max-width: 700px;
+    width: 90%;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.9), 0 0 120px rgba(255, 215, 0, 0.4);
+    animation: mini-game-appear 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes mini-game-appear {
+    0% {
+        transform: scale(0.5) rotate(-10deg);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1) rotate(0);
+        opacity: 1;
+    }
+}
+
+.mini-game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+}
+
+.mini-game-header h2 {
+    color: var(--accent-color);
+    font-size: 1.8em;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+.mini-game-timer {
+    background: rgba(211, 47, 47, 0.3);
+    border: 2px solid #d32f2f;
+    padding: 10px 20px;
+    border-radius: 15px;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #fff;
+}
+
+.mini-game-description {
+    text-align: center;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    color: var(--secondary-color);
+}
+
+.mini-game-area {
+    min-height: 300px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--primary-color);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.mini-game-progress {
+    height: 30px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.mini-game-progress .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-color), rgba(255, 215, 0, 0.6));
+    transition: width 0.3s ease;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+}
+
+.mini-game-skip {
+    background: rgba(211, 47, 47, 0.3);
+    border: 2px solid #d32f2f;
+    color: #fff;
+    padding: 10px 25px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: all 0.3s ease;
+}
+
+.mini-game-skip:hover {
+    background: #d32f2f;
+    transform: scale(1.05);
+}
+
+/* Mini-Game Specific Elements */
+.meteor {
+    position: absolute;
+    font-size: 3em;
+    cursor: pointer;
+    animation: meteor-fall 3s linear;
+    transition: transform 0.1s ease;
+}
+
+.meteor:hover {
+    transform: scale(1.3);
+}
+
+@keyframes meteor-fall {
+    0% {
+        top: -50px;
+        opacity: 1;
+    }
+    100% {
+        top: 100%;
+        opacity: 0.5;
+    }
+}
+
+.asteroid {
+    position: absolute;
+    font-size: 4em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+}
+
+.asteroid:hover {
+    transform: scale(1.2) rotate(20deg);
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.9));
+}
+
+.clicker-game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    height: 100%;
+}
+
+.clicker-target {
+    font-size: 8em;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+    filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.6));
+    animation: clicker-pulse 1s ease-in-out infinite;
+}
+
+.clicker-target:active {
+    transform: scale(0.9);
+}
+
+@keyframes clicker-pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.clicker-count {
+    font-size: 2em;
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+.alien-trader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    height: 100%;
+}
+
+.alien-ship {
+    font-size: 6em;
+    animation: alien-hover 2s ease-in-out infinite;
+}
+
+@keyframes alien-hover {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+.trade-offer {
+    font-size: 1.3em;
+    color: var(--secondary-color);
+}
+
+.trade-button {
+    background: var(--primary-color);
+    border: 2px solid var(--accent-color);
+    color: #fff;
+    padding: 15px 40px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 1.2em;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+}
+
+.trade-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.5);
+}
+
+.black-hole-game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    height: 100%;
+    position: relative;
+}
+
+.black-hole {
+    font-size: 10em;
+    animation: black-hole-spin 4s linear infinite;
+    filter: drop-shadow(0 0 50px rgba(128, 0, 128, 0.9));
+}
+
+@keyframes black-hole-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.escape-ship {
+    font-size: 4em;
+    position: absolute;
+    bottom: 20px;
+    animation: ship-struggle 0.3s ease-in-out infinite;
+}
+
+@keyframes ship-struggle {
+    0%, 100% {
+        transform: translateY(0) rotate(-5deg);
+    }
+    50% {
+        transform: translateY(5px) rotate(5deg);
+    }
+}
+
+.escape-instructions {
+    font-size: 1.3em;
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+.escape-progress {
+    font-size: 2em;
+    font-weight: bold;
+    color: var(--secondary-color);
+}
+
+/* Mini-Game Reward Notification */
+.mini-game-reward {
+    position: fixed;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, rgba(0, 150, 0, 0.95), rgba(0, 200, 0, 0.95));
+    border: 3px solid var(--accent-color);
+    padding: 20px 40px;
+    border-radius: 20px;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #fff;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9), 0 0 60px rgba(255, 215, 0, 0.5);
+    z-index: 10002;
+    transition: bottom 0.5s ease;
+}
+
+.mini-game-reward.show {
+    bottom: 50px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}

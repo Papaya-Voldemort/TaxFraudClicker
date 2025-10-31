@@ -5,7 +5,11 @@ export class ClickHandler {
     }
 
     handleClick(event) {
-        const amount = this.gameState.moneyPerClick;
+        // Get the correct per-click amount based on current planet
+        const amount = this.gameState.currentPlanet === 'earth' 
+            ? this.gameState.moneyPerClick 
+            : this.gameState.marsCreditsPerClick;
+            
         this.gameState.addMoney(amount);
         this.gameState.incrementClicks();
 

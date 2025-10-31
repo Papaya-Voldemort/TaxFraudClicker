@@ -9,6 +9,8 @@ import { TabManager } from './modules/TabManager.js';
 import { AchievementManager } from './modules/AchievementManager.js';
 import { JailManager } from './modules/JailManager.js';
 import { MarsManager } from './modules/MarsManager.js';
+import { PlanetManager } from './modules/PlanetManager.js';
+import { MiniGameManager } from './modules/MiniGameManager.js';
 
 class Game {
     constructor() {
@@ -20,9 +22,14 @@ class Game {
         this.autoClickerUpgradeManager = new AutoClickerUpgradeManager(this.gameState, this.ui);
         this.jailManager = new JailManager(this.gameState, this.ui);
         this.marsManager = new MarsManager(this.gameState, this.ui, this.upgradeManager, this.autoClickerManager, this.autoClickerUpgradeManager);
+        this.planetManager = new PlanetManager(this.gameState, this.ui, this.upgradeManager, this.autoClickerManager, this.autoClickerUpgradeManager);
+        this.miniGameManager = new MiniGameManager(this.gameState, this.ui);
         this.saveManager = new SaveManager(this.gameState, this.jailManager);
         this.tabManager = new TabManager();
         this.achievementManager = new AchievementManager(this.gameState, this.ui);
+        
+        // Set up bi-directional references
+        this.upgradeManager.setPlanetManager(this.planetManager);
         
         this.init();
     }
@@ -35,11 +42,21 @@ class Game {
         this.achievementManager.unlockedAchievements = this.gameState.unlockedAchievements;
         this.achievementManager.init();
         
-        // Initialize Mars if unlocked
-        if (this.gameState.marsUnlocked) {
+        // Initialize Mars if unlocked (legacy support)
+        if (this.gameState.marsUnlocked || this.gameState.unlockedPlanets.has('mars')) {
+            this.gameState.unlockedPlanets.add('mars');
             this.marsManager.updatePlanetToggle();
             this.marsManager.updateTheme(this.gameState.currentPlanet);
             this.marsManager.updateHeader(this.gameState.currentPlanet);
+        }
+        
+        // Initialize current planet theme
+        this.planetManager.updateTheme(this.gameState.currentPlanet);
+        this.planetManager.updateHeader(this.gameState.currentPlanet);
+        
+        // Create warp menu if multiple planets unlocked
+        if (this.gameState.unlockedPlanets.size > 1) {
+            this.planetManager.createWarpMenu();
         }
         
         // Initialize UI
@@ -219,8 +236,21 @@ class Game {
                     this.jailManager.checkIRSDetection();
                 }
                 
-                // Check if Mars launch option should be shown
+                // Check if Mars launch option should be shown (legacy)
                 this.marsManager.checkAndShowLaunchOption();
+                
+                // Check for planet unlock options
+                this.planetManager.checkAndShowUnlockOptions();
+                
+                // Check for mini-games (every few frames to reduce overhead)
+                if (Math.random() < 0.01) { // ~1% chance per frame
+                    this.miniGameManager.checkForMiniGames();
+                }
+                
+                // Update warp menu button visibility
+                if (this.gameState.unlockedPlanets.size > 1) {
+                    this.planetManager.createWarpMenu();
+                }
 
                 // Update UI
                 this.ui.updateAll(this.gameState);

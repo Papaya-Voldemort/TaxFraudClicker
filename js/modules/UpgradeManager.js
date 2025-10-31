@@ -2,19 +2,30 @@ import { upgradesData } from '../data/upgrades.js';
 import { marsUpgradesData } from '../data/marsData.js';
 
 export class UpgradeManager {
-    constructor(gameState, ui) {
+    constructor(gameState, ui, planetManager = null) {
         this.gameState = gameState;
         this.ui = ui;
+        this.planetManager = planetManager;
         this.upgrades = upgradesData;
         this.marsUpgrades = marsUpgradesData;
         this.upgradeElements = new Map();
+    }
+    
+    setPlanetManager(planetManager) {
+        this.planetManager = planetManager;
     }
 
     renderUpgrades() {
         const container = document.getElementById('upgrades-container');
         container.innerHTML = '';
 
-        const upgradesToShow = this.gameState.currentPlanet === 'earth' ? this.upgrades : this.marsUpgrades;
+        // Use PlanetManager if available, otherwise fall back to legacy
+        let upgradesToShow;
+        if (this.planetManager) {
+            upgradesToShow = this.planetManager.getPlanetUpgrades(this.gameState.currentPlanet);
+        } else {
+            upgradesToShow = this.gameState.currentPlanet === 'earth' ? this.upgrades : this.marsUpgrades;
+        }
 
         upgradesToShow.forEach(upgrade => {
             // Check if upgrade should be visible

@@ -1,211 +1,276 @@
 export class GameState {
     constructor() {
-        // Earth resources
-        this.money = 0;
-        this.moneyPerClick = 1;
-        this.moneyPerSecond = 0;
-        this.totalClicks = 0;
-        this.totalMoneyEarned = 0;
-        this.purchasedUpgrades = new Set();
-        this.autoClickers = new Map(); // Map of autoClickerId -> count
-        this.purchasedAutoClickerUpgrades = new Set();
-        this.autoClickerMultiplier = 1;
+        // Global state
+        this.currentPlanet = 'earth';
+        this.unlockedPlanets = new Set(['earth']); // Earth is always unlocked
         this.unlockedAchievements = new Set();
-        this.timesJailed = 0;
         
-        // Mars resources
+        // Planet-specific states stored in a map
+        this.planetStates = {};
+        
+        // Initialize Earth
+        this.initializePlanetState('earth');
+        
+        // Legacy compatibility - keep old Mars unlock flag
         this.marsUnlocked = false;
-        this.currentPlanet = 'earth'; // 'earth' or 'mars'
-        this.marsCredits = 0;
-        this.marsCreditsPerClick = 1;
-        this.marsCreditsPerSecond = 0;
-        this.marsTotalClicks = 0;
-        this.marsTotalCreditsEarned = 0;
-        this.marsPurchasedUpgrades = new Set();
-        this.marsAutoClickers = new Map();
-        this.marsPurchasedAutoClickerUpgrades = new Set();
-        this.marsAutoClickerMultiplier = 1;
-        this.marsTimesJailed = 0;
+    }
+    
+    initializePlanetState(planetId) {
+        if (this.planetStates[planetId]) return; // Already initialized
+        
+        this.planetStates[planetId] = {
+            currency: 0,
+            currencyPerClick: 1,
+            currencyPerSecond: 0,
+            totalClicks: 0,
+            totalCurrencyEarned: 0,
+            purchasedUpgrades: new Set(),
+            autoClickers: new Map(),
+            purchasedAutoClickerUpgrades: new Set(),
+            autoClickerMultiplier: 1,
+            timesJailed: 0
+        };
+    }
+    
+    getCurrentPlanetState() {
+        if (!this.planetStates[this.currentPlanet]) {
+            this.initializePlanetState(this.currentPlanet);
+        }
+        return this.planetStates[this.currentPlanet];
+    }
+    
+    getPlanetState(planetId) {
+        if (!this.planetStates[planetId]) {
+            this.initializePlanetState(planetId);
+        }
+        return this.planetStates[planetId];
+    }
+    
+    // Convenience getters for backward compatibility
+    get money() { return this.getCurrentPlanetState().currency; }
+    set money(val) { this.getCurrentPlanetState().currency = val; }
+    
+    get moneyPerClick() { return this.getCurrentPlanetState().currencyPerClick; }
+    set moneyPerClick(val) { this.getCurrentPlanetState().currencyPerClick = val; }
+    
+    get moneyPerSecond() { return this.getCurrentPlanetState().currencyPerSecond; }
+    set moneyPerSecond(val) { this.getCurrentPlanetState().currencyPerSecond = val; }
+    
+    get totalClicks() { return this.getCurrentPlanetState().totalClicks; }
+    set totalClicks(val) { this.getCurrentPlanetState().totalClicks = val; }
+    
+    get totalMoneyEarned() { return this.getCurrentPlanetState().totalCurrencyEarned; }
+    set totalMoneyEarned(val) { this.getCurrentPlanetState().totalCurrencyEarned = val; }
+    
+    get purchasedUpgrades() { return this.getCurrentPlanetState().purchasedUpgrades; }
+    get autoClickers() { return this.getCurrentPlanetState().autoClickers; }
+    get purchasedAutoClickerUpgrades() { return this.getCurrentPlanetState().purchasedAutoClickerUpgrades; }
+    
+    get autoClickerMultiplier() { return this.getCurrentPlanetState().autoClickerMultiplier; }
+    set autoClickerMultiplier(val) { this.getCurrentPlanetState().autoClickerMultiplier = val; }
+    
+    get timesJailed() { 
+        const state = this.getCurrentPlanetState();
+        return state ? state.timesJailed : 0;
+    }
+    set timesJailed(val) { 
+        const state = this.getCurrentPlanetState();
+        if (state) state.timesJailed = val;
+    }
+    
+    // Mars-specific getters for backward compatibility
+    get marsCredits() { return this.getPlanetState('mars').currency; }
+    set marsCredits(val) { this.getPlanetState('mars').currency = val; }
+    
+    get marsCreditsPerClick() { return this.getPlanetState('mars').currencyPerClick; }
+    set marsCreditsPerClick(val) { this.getPlanetState('mars').currencyPerClick = val; }
+    
+    get marsCreditsPerSecond() { return this.getPlanetState('mars').currencyPerSecond; }
+    set marsCreditsPerSecond(val) { this.getPlanetState('mars').currencyPerSecond = val; }
+    
+    get marsTotalClicks() { return this.getPlanetState('mars').totalClicks; }
+    set marsTotalClicks(val) { this.getPlanetState('mars').totalClicks = val; }
+    
+    get marsTotalCreditsEarned() { return this.getPlanetState('mars').totalCurrencyEarned; }
+    set marsTotalCreditsEarned(val) { this.getPlanetState('mars').totalCurrencyEarned = val; }
+    
+    get marsPurchasedUpgrades() { return this.getPlanetState('mars').purchasedUpgrades; }
+    get marsAutoClickers() { return this.getPlanetState('mars').autoClickers; }
+    get marsPurchasedAutoClickerUpgrades() { return this.getPlanetState('mars').purchasedAutoClickerUpgrades; }
+    
+    get marsAutoClickerMultiplier() { return this.getPlanetState('mars').autoClickerMultiplier; }
+    set marsAutoClickerMultiplier(val) { this.getPlanetState('mars').autoClickerMultiplier = val; }
+    
+    get marsTimesJailed() { return this.getPlanetState('mars').timesJailed; }
+    set marsTimesJailed(val) { this.getPlanetState('mars').timesJailed = val; }
+    
+    // Generic planet methods
+    getPlanetCurrency(planetId) {
+        return this.getPlanetState(planetId).currency;
+    }
+    
+    setPlanetCurrency(planetId, amount) {
+        this.getPlanetState(planetId).currency = amount;
     }
 
     addMoney(amount) {
-        if (this.currentPlanet === 'earth') {
-            this.money += amount;
-            this.totalMoneyEarned += amount;
-        } else {
-            this.marsCredits += amount;
-            this.marsTotalCreditsEarned += amount;
-        }
+        const state = this.getCurrentPlanetState();
+        state.currency += amount;
+        state.totalCurrencyEarned += amount;
     }
 
     spendMoney(amount) {
-        if (this.currentPlanet === 'earth') {
-            if (this.money >= amount) {
-                this.money -= amount;
-                return true;
-            }
-        } else {
-            if (this.marsCredits >= amount) {
-                this.marsCredits -= amount;
-                return true;
-            }
+        const state = this.getCurrentPlanetState();
+        if (state.currency >= amount) {
+            state.currency -= amount;
+            return true;
         }
         return false;
     }
 
     canAfford(amount) {
-        if (this.currentPlanet === 'earth') {
-            return this.money >= amount;
-        } else {
-            return this.marsCredits >= amount;
-        }
+        return this.getCurrentPlanetState().currency >= amount;
     }
 
     increaseMoneyPerClick(amount) {
-        if (this.currentPlanet === 'earth') {
-            this.moneyPerClick += amount;
-        } else {
-            this.marsCreditsPerClick += amount;
-        }
+        this.getCurrentPlanetState().currencyPerClick += amount;
     }
 
     increaseMoneyPerSecond(amount) {
-        if (this.currentPlanet === 'earth') {
-            this.moneyPerSecond += amount * this.autoClickerMultiplier;
-        } else {
-            this.marsCreditsPerSecond += amount * this.marsAutoClickerMultiplier;
-        }
+        const state = this.getCurrentPlanetState();
+        state.currencyPerSecond += amount * state.autoClickerMultiplier;
     }
 
     multiplyAutoClickerEfficiency(multiplier) {
-        if (this.currentPlanet === 'earth') {
-            // Recalculate moneyPerSecond based on new multiplier
-            const oldMultiplier = this.autoClickerMultiplier;
-            this.autoClickerMultiplier *= multiplier;
-            const ratio = this.autoClickerMultiplier / oldMultiplier;
-            this.moneyPerSecond *= ratio;
-        } else {
-            // Recalculate marsCreditsPerSecond based on new multiplier
-            const oldMultiplier = this.marsAutoClickerMultiplier;
-            this.marsAutoClickerMultiplier *= multiplier;
-            const ratio = this.marsAutoClickerMultiplier / oldMultiplier;
-            this.marsCreditsPerSecond *= ratio;
-        }
+        const state = this.getCurrentPlanetState();
+        const oldMultiplier = state.autoClickerMultiplier;
+        state.autoClickerMultiplier *= multiplier;
+        const ratio = state.autoClickerMultiplier / oldMultiplier;
+        state.currencyPerSecond *= ratio;
     }
 
     purchaseAutoClickerUpgrade(upgradeId) {
-        if (this.currentPlanet === 'earth') {
-            this.purchasedAutoClickerUpgrades.add(upgradeId);
-        } else {
-            this.marsPurchasedAutoClickerUpgrades.add(upgradeId);
-        }
+        this.getCurrentPlanetState().purchasedAutoClickerUpgrades.add(upgradeId);
     }
 
     hasAutoClickerUpgrade(upgradeId) {
-        if (this.currentPlanet === 'earth') {
-            return this.purchasedAutoClickerUpgrades.has(upgradeId);
-        } else {
-            return this.marsPurchasedAutoClickerUpgrades.has(upgradeId);
-        }
+        return this.getCurrentPlanetState().purchasedAutoClickerUpgrades.has(upgradeId);
     }
 
     purchaseUpgrade(upgradeId) {
-        if (this.currentPlanet === 'earth') {
-            this.purchasedUpgrades.add(upgradeId);
-        } else {
-            this.marsPurchasedUpgrades.add(upgradeId);
-        }
+        this.getCurrentPlanetState().purchasedUpgrades.add(upgradeId);
     }
 
     hasUpgrade(upgradeId) {
-        if (this.currentPlanet === 'earth') {
-            return this.purchasedUpgrades.has(upgradeId);
-        } else {
-            return this.marsPurchasedUpgrades.has(upgradeId);
-        }
+        return this.getCurrentPlanetState().purchasedUpgrades.has(upgradeId);
     }
 
     addAutoClicker(autoClickerId) {
-        if (this.currentPlanet === 'earth') {
-            const current = this.autoClickers.get(autoClickerId) || 0;
-            this.autoClickers.set(autoClickerId, current + 1);
-        } else {
-            const current = this.marsAutoClickers.get(autoClickerId) || 0;
-            this.marsAutoClickers.set(autoClickerId, current + 1);
-        }
+        const state = this.getCurrentPlanetState();
+        const current = state.autoClickers.get(autoClickerId) || 0;
+        state.autoClickers.set(autoClickerId, current + 1);
     }
 
     getAutoClickerCount(autoClickerId) {
-        if (this.currentPlanet === 'earth') {
-            return this.autoClickers.get(autoClickerId) || 0;
-        } else {
-            return this.marsAutoClickers.get(autoClickerId) || 0;
-        }
+        return this.getCurrentPlanetState().autoClickers.get(autoClickerId) || 0;
     }
 
     incrementClicks() {
-        if (this.currentPlanet === 'earth') {
-            this.totalClicks++;
-        } else {
-            this.marsTotalClicks++;
-        }
+        this.getCurrentPlanetState().totalClicks++;
     }
 
     toJSON() {
+        const planetStatesJSON = {};
+        for (const [planetId, state] of Object.entries(this.planetStates)) {
+            planetStatesJSON[planetId] = {
+                currency: state.currency,
+                currencyPerClick: state.currencyPerClick,
+                currencyPerSecond: state.currencyPerSecond,
+                totalClicks: state.totalClicks,
+                totalCurrencyEarned: state.totalCurrencyEarned,
+                purchasedUpgrades: Array.from(state.purchasedUpgrades),
+                autoClickers: Array.from(state.autoClickers.entries()),
+                purchasedAutoClickerUpgrades: Array.from(state.purchasedAutoClickerUpgrades),
+                autoClickerMultiplier: state.autoClickerMultiplier,
+                timesJailed: state.timesJailed
+            };
+        }
+        
         return {
-            // Earth
-            money: this.money,
-            moneyPerClick: this.moneyPerClick,
-            moneyPerSecond: this.moneyPerSecond,
-            totalClicks: this.totalClicks,
-            totalMoneyEarned: this.totalMoneyEarned,
-            purchasedUpgrades: Array.from(this.purchasedUpgrades),
-            autoClickers: Array.from(this.autoClickers.entries()),
-            purchasedAutoClickerUpgrades: Array.from(this.purchasedAutoClickerUpgrades),
-            autoClickerMultiplier: this.autoClickerMultiplier,
-            unlockedAchievements: Array.from(this.unlockedAchievements),
-            timesJailed: this.timesJailed,
-            // Mars
-            marsUnlocked: this.marsUnlocked,
             currentPlanet: this.currentPlanet,
-            marsCredits: this.marsCredits,
-            marsCreditsPerClick: this.marsCreditsPerClick,
-            marsCreditsPerSecond: this.marsCreditsPerSecond,
-            marsTotalClicks: this.marsTotalClicks,
-            marsTotalCreditsEarned: this.marsTotalCreditsEarned,
-            marsPurchasedUpgrades: Array.from(this.marsPurchasedUpgrades),
-            marsAutoClickers: Array.from(this.marsAutoClickers.entries()),
-            marsPurchasedAutoClickerUpgrades: Array.from(this.marsPurchasedAutoClickerUpgrades),
-            marsAutoClickerMultiplier: this.marsAutoClickerMultiplier,
-            marsTimesJailed: this.marsTimesJailed
+            unlockedPlanets: Array.from(this.unlockedPlanets),
+            unlockedAchievements: Array.from(this.unlockedAchievements),
+            planetStates: planetStatesJSON,
+            // Legacy compatibility
+            marsUnlocked: this.unlockedPlanets.has('mars')
         };
     }
 
     fromJSON(data) {
-        // Earth
-        this.money = data.money || 0;
-        this.moneyPerClick = data.moneyPerClick || 1;
-        this.moneyPerSecond = data.moneyPerSecond || 0;
-        this.totalClicks = data.totalClicks || 0;
-        this.totalMoneyEarned = data.totalMoneyEarned || 0;
-        this.purchasedUpgrades = new Set(data.purchasedUpgrades || []);
-        this.autoClickers = new Map(data.autoClickers || []);
-        this.purchasedAutoClickerUpgrades = new Set(data.purchasedAutoClickerUpgrades || []);
-        this.autoClickerMultiplier = data.autoClickerMultiplier || 1;
-        this.unlockedAchievements = new Set(data.unlockedAchievements || []);
-        this.timesJailed = data.timesJailed || 0;
-        // Mars
-        this.marsUnlocked = data.marsUnlocked || false;
         this.currentPlanet = data.currentPlanet || 'earth';
-        this.marsCredits = data.marsCredits || 0;
-        this.marsCreditsPerClick = data.marsCreditsPerClick || 1;
-        this.marsCreditsPerSecond = data.marsCreditsPerSecond || 0;
-        this.marsTotalClicks = data.marsTotalClicks || 0;
-        this.marsTotalCreditsEarned = data.marsTotalCreditsEarned || 0;
-        this.marsPurchasedUpgrades = new Set(data.marsPurchasedUpgrades || []);
-        this.marsAutoClickers = new Map(data.marsAutoClickers || []);
-        this.marsPurchasedAutoClickerUpgrades = new Set(data.marsPurchasedAutoClickerUpgrades || []);
-        this.marsAutoClickerMultiplier = data.marsAutoClickerMultiplier || 1;
-        this.marsTimesJailed = data.marsTimesJailed || 0;
+        this.unlockedPlanets = new Set(data.unlockedPlanets || ['earth']);
+        this.unlockedAchievements = new Set(data.unlockedAchievements || []);
+        
+        // Load planet states
+        this.planetStates = {};
+        if (data.planetStates) {
+            for (const [planetId, stateData] of Object.entries(data.planetStates)) {
+                this.planetStates[planetId] = {
+                    currency: stateData.currency || 0,
+                    currencyPerClick: stateData.currencyPerClick || 1,
+                    currencyPerSecond: stateData.currencyPerSecond || 0,
+                    totalClicks: stateData.totalClicks || 0,
+                    totalCurrencyEarned: stateData.totalCurrencyEarned || 0,
+                    purchasedUpgrades: new Set(stateData.purchasedUpgrades || []),
+                    autoClickers: new Map(stateData.autoClickers || []),
+                    purchasedAutoClickerUpgrades: new Set(stateData.purchasedAutoClickerUpgrades || []),
+                    autoClickerMultiplier: stateData.autoClickerMultiplier || 1,
+                    timesJailed: stateData.timesJailed || 0
+                };
+            }
+        }
+        
+        // Legacy support - convert old save format
+        if (data.money !== undefined && !this.planetStates['earth']) {
+            this.initializePlanetState('earth');
+            const earthState = this.planetStates['earth'];
+            earthState.currency = data.money || 0;
+            earthState.currencyPerClick = data.moneyPerClick || 1;
+            earthState.currencyPerSecond = data.moneyPerSecond || 0;
+            earthState.totalClicks = data.totalClicks || 0;
+            earthState.totalCurrencyEarned = data.totalMoneyEarned || 0;
+            earthState.purchasedUpgrades = new Set(data.purchasedUpgrades || []);
+            earthState.autoClickers = new Map(data.autoClickers || []);
+            earthState.purchasedAutoClickerUpgrades = new Set(data.purchasedAutoClickerUpgrades || []);
+            earthState.autoClickerMultiplier = data.autoClickerMultiplier || 1;
+            earthState.timesJailed = data.timesJailed || 0;
+        }
+        
+        if (data.marsCredits !== undefined && !this.planetStates['mars']) {
+            this.initializePlanetState('mars');
+            const marsState = this.planetStates['mars'];
+            marsState.currency = data.marsCredits || 0;
+            marsState.currencyPerClick = data.marsCreditsPerClick || 1;
+            marsState.currencyPerSecond = data.marsCreditsPerSecond || 0;
+            marsState.totalClicks = data.marsTotalClicks || 0;
+            marsState.totalCurrencyEarned = data.marsTotalCreditsEarned || 0;
+            marsState.purchasedUpgrades = new Set(data.marsPurchasedUpgrades || []);
+            marsState.autoClickers = new Map(data.marsAutoClickers || []);
+            marsState.purchasedAutoClickerUpgrades = new Set(data.marsPurchasedAutoClickerUpgrades || []);
+            marsState.autoClickerMultiplier = data.marsAutoClickerMultiplier || 1;
+            marsState.timesJailed = data.marsTimesJailed || 0;
+            
+            if (data.marsUnlocked) {
+                this.unlockedPlanets.add('mars');
+            }
+        }
+        
+        // Ensure Earth is always initialized
+        if (!this.planetStates['earth']) {
+            this.initializePlanetState('earth');
+        }
+        
+        // Legacy marsUnlocked flag
+        this.marsUnlocked = this.unlockedPlanets.has('mars');
     }
 }
