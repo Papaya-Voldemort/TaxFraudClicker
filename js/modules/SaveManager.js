@@ -3,9 +3,14 @@ export class SaveManager {
         this.gameState = gameState;
         this.jailManager = jailManager;
         this.saveKey = 'taxFraudClickerSave';
+        this.savingEnabled = true;
     }
 
     save() {
+        if (!this.savingEnabled) {
+            console.log('Saving disabled, skipping save');
+            return;
+        }
         try {
             const saveData = {
                 gameState: this.gameState.toJSON(),

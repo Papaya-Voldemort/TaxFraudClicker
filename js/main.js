@@ -102,7 +102,7 @@ class Game {
         // Settings buttons
         document.getElementById('save-button').addEventListener('click', () => {
             this.saveManager.save();
-            alert('Game saved successfully!');
+            this.showToast('💾 Game saved successfully!', 'success');
         });
 
         document.getElementById('load-button').addEventListener('click', () => {
@@ -111,9 +111,9 @@ class Game {
                 this.upgradeManager.renderUpgrades();
                 this.autoClickerManager.renderAutoClickers();
                 this.autoClickerUpgradeManager.renderUpgrades();
-                alert('Game loaded successfully!');
+                this.showToast('📂 Game loaded successfully!', 'success');
             } else {
-                alert('No save file found!');
+                this.showToast('❌ No save file found!', 'error');
             }
         });
 
@@ -156,12 +156,31 @@ class Game {
 
         // Reset button
         document.getElementById('reset-game-button').addEventListener('click', () => {
-            if (confirm('Are you sure you want to reset your game? All progress will be lost!')) {
-                this.achievementManager.manualUnlock('reset_game');
-                setTimeout(() => {
-                    this.saveManager.reset();
-                    location.reload();
-                }, 2000);
+            const stats = {
+                money: this.ui.formatNumber(this.gameState.money || 0),
+                clicks: this.ui.formatNumber(this.gameState.totalClicks || 0),
+                achievements: this.achievementManager?.unlockedAchievements?.size || 0,
+                planets: this.gameState?.unlockedPlanets?.size || 0
+            };
+            
+            const message = `⚠️ WARNING: This will reset ALL game progress! ⚠️\n\n` +
+                `You will lose:\n` +
+                `• ${stats.money} Hidden Money\n` +
+                `• ${stats.clicks} Total Clicks\n` +
+                `• ${stats.achievements} Achievements\n` +
+                `• ${stats.planets} Unlocked Planets\n` +
+                `• All upgrades and auto-clickers\n\n` +
+                `This action CANNOT be undone!\n\n` +
+                `Are you absolutely sure?`;
+            
+            if (confirm(message)) {
+                // Disable auto-save to prevent saving during reset
+                // Note: This flag is only set temporarily before page reload, so no need to reset it
+                this.saveManager.savingEnabled = false;
+                // Reset the game data in localStorage
+                this.saveManager.reset();
+                // Reload the page immediately to start fresh
+                location.reload();
             }
         });
 
@@ -289,6 +308,34 @@ class Game {
         // Update statistics in settings tab
         document.getElementById('stat-total-clicks').textContent = this.ui.formatNumber(this.gameState.totalClicks);
         document.getElementById('stat-total-money').textContent = this.ui.formatNumber(this.gameState.totalMoneyEarned);
+    }
+
+    showToast(message, type = 'info') {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `game-toast game-toast-${type}`;
+        toast.textContent = message;
+        
+        // Add to document
+        document.body.appendChild(toast);
+        
+        // Trigger animation
+        const showTimeout = setTimeout(() => toast.classList.add('show'), 10);
+        
+        // Remove after 3 seconds
+        const removeTimeout = setTimeout(() => {
+            if (toast.parentElement) { // Only remove if still in DOM
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        toast.remove();
+                    }
+                }, 300);
+            }
+        }, 3000);
+        
+        // Store timeouts for potential cleanup
+        toast._timeouts = [showTimeout, removeTimeout];
     }
 }
 
