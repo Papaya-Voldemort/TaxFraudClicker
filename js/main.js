@@ -157,11 +157,12 @@ class Game {
         // Reset button
         document.getElementById('reset-game-button').addEventListener('click', () => {
             if (confirm('Are you sure you want to reset your game? All progress will be lost!')) {
-                this.achievementManager.manualUnlock('reset_game');
-                setTimeout(() => {
-                    this.saveManager.reset();
-                    location.reload();
-                }, 2000);
+                // Disable auto-save to prevent saving during reset
+                this.saveManager.savingEnabled = false;
+                // Reset the game data in localStorage
+                this.saveManager.reset();
+                // Reload the page immediately to start fresh
+                location.reload();
             }
         });
 
