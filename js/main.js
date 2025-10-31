@@ -157,10 +157,10 @@ class Game {
         // Reset button
         document.getElementById('reset-game-button').addEventListener('click', () => {
             const stats = {
-                money: this.ui.formatNumber(this.gameState.money),
-                clicks: this.ui.formatNumber(this.gameState.totalClicks),
-                achievements: this.achievementManager.unlockedAchievements.size,
-                planets: this.gameState.unlockedPlanets.size
+                money: this.ui.formatNumber(this.gameState.money || 0),
+                clicks: this.ui.formatNumber(this.gameState.totalClicks || 0),
+                achievements: this.achievementManager?.unlockedAchievements?.size || 0,
+                planets: this.gameState?.unlockedPlanets?.size || 0
             };
             
             const message = `⚠️ WARNING: This will reset ALL game progress! ⚠️\n\n` +
@@ -175,6 +175,7 @@ class Game {
             
             if (confirm(message)) {
                 // Disable auto-save to prevent saving during reset
+                // Note: This flag is only set temporarily before page reload, so no need to reset it
                 this.saveManager.savingEnabled = false;
                 // Reset the game data in localStorage
                 this.saveManager.reset();
@@ -319,13 +320,22 @@ class Game {
         document.body.appendChild(toast);
         
         // Trigger animation
-        setTimeout(() => toast.classList.add('show'), 10);
+        const showTimeout = setTimeout(() => toast.classList.add('show'), 10);
         
         // Remove after 3 seconds
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
+        const removeTimeout = setTimeout(() => {
+            if (toast.parentElement) { // Only remove if still in DOM
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        toast.remove();
+                    }
+                }, 300);
+            }
         }, 3000);
+        
+        // Store timeouts for potential cleanup
+        toast._timeouts = [showTimeout, removeTimeout];
     }
 }
 
