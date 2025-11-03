@@ -10,7 +10,6 @@ import { AchievementManager } from './modules/AchievementManager.js';
 import { JailManager } from './modules/JailManager.js';
 import { MarsManager } from './modules/MarsManager.js';
 import { PlanetManager } from './modules/PlanetManager.js';
-import { MiniGameManager } from './modules/MiniGameManager.js';
 
 class Game {
     constructor() {
@@ -23,7 +22,6 @@ class Game {
         this.jailManager = new JailManager(this.gameState, this.ui);
         this.marsManager = new MarsManager(this.gameState, this.ui, this.upgradeManager, this.autoClickerManager, this.autoClickerUpgradeManager);
         this.planetManager = new PlanetManager(this.gameState, this.ui, this.upgradeManager, this.autoClickerManager, this.autoClickerUpgradeManager);
-        this.miniGameManager = new MiniGameManager(this.gameState, this.ui);
         this.saveManager = new SaveManager(this.gameState, this.jailManager);
         this.tabManager = new TabManager();
         this.achievementManager = new AchievementManager(this.gameState, this.ui);
@@ -102,7 +100,7 @@ class Game {
         // Settings buttons
         document.getElementById('save-button').addEventListener('click', () => {
             this.saveManager.save();
-            alert('Game saved successfully!');
+            this.showToast('💾 Game saved successfully!', 'success');
         });
 
         document.getElementById('load-button').addEventListener('click', () => {
@@ -111,9 +109,9 @@ class Game {
                 this.upgradeManager.renderUpgrades();
                 this.autoClickerManager.renderAutoClickers();
                 this.autoClickerUpgradeManager.renderUpgrades();
-                alert('Game loaded successfully!');
+                this.showToast('📂 Game loaded successfully!', 'success');
             } else {
-                alert('No save file found!');
+                this.showToast('❌ No save file found!', 'error');
             }
         });
 
@@ -156,12 +154,31 @@ class Game {
 
         // Reset button
         document.getElementById('reset-game-button').addEventListener('click', () => {
-            if (confirm('Are you sure you want to reset your game? All progress will be lost!')) {
-                this.achievementManager.manualUnlock('reset_game');
-                setTimeout(() => {
-                    this.saveManager.reset();
-                    location.reload();
-                }, 2000);
+            const stats = {
+                money: this.ui.formatNumber(this.gameState.money || 0),
+                clicks: this.ui.formatNumber(this.gameState.totalClicks || 0),
+                achievements: this.achievementManager?.unlockedAchievements?.size || 0,
+                planets: this.gameState?.unlockedPlanets?.size || 0
+            };
+            
+            const message = `⚠️ WARNING: This will reset ALL game progress! ⚠️\n\n` +
+                `You will lose:\n` +
+                `• ${stats.money} Hidden Money\n` +
+                `• ${stats.clicks} Total Clicks\n` +
+                `• ${stats.achievements} Achievements\n` +
+                `• ${stats.planets} Unlocked Planets\n` +
+                `• All upgrades and auto-clickers\n\n` +
+                `This action CANNOT be undone!\n\n` +
+                `Are you absolutely sure?`;
+            
+            if (confirm(message)) {
+                // Disable auto-save to prevent saving during reset
+                // Note: This flag is only set temporarily before page reload, so no need to reset it
+                this.saveManager.savingEnabled = false;
+                // Reset the game data in localStorage
+                this.saveManager.reset();
+                // Reload the page immediately to start fresh
+                location.reload();
             }
         });
 
@@ -208,6 +225,19 @@ class Game {
             }
         });
 
+        // Dev menu toggle (press 'd' key)
+        let devMenuOpen = false;
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'd' || e.key === 'D') {
+                devMenuOpen = !devMenuOpen;
+                if (devMenuOpen) {
+                    this.showDevMenu();
+                } else {
+                    this.hideDevMenu();
+                }
+            }
+        });
+
         // Auto-save every 10 seconds
         setInterval(() => {
             this.saveManager.save();
@@ -241,11 +271,6 @@ class Game {
                 
                 // Check for planet unlock options
                 this.planetManager.checkAndShowUnlockOptions();
-                
-                // Check for mini-games (every few frames to reduce overhead)
-                if (Math.random() < 0.01) { // ~1% chance per frame
-                    this.miniGameManager.checkForMiniGames();
-                }
                 
                 // Update warp menu button visibility
                 if (this.gameState.unlockedPlanets.size > 1) {
@@ -289,6 +314,156 @@ class Game {
         // Update statistics in settings tab
         document.getElementById('stat-total-clicks').textContent = this.ui.formatNumber(this.gameState.totalClicks);
         document.getElementById('stat-total-money').textContent = this.ui.formatNumber(this.gameState.totalMoneyEarned);
+    }
+
+    showToast(message, type = 'info') {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `game-toast game-toast-${type}`;
+        toast.textContent = message;
+        
+        // Add to document
+        document.body.appendChild(toast);
+        
+        // Trigger animation
+        const showTimeout = setTimeout(() => toast.classList.add('show'), 10);
+        
+        // Remove after 3 seconds
+        const removeTimeout = setTimeout(() => {
+            if (toast.parentElement) { // Only remove if still in DOM
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        toast.remove();
+                    }
+                }, 300);
+            }
+        }, 3000);
+        
+        // Store timeouts for potential cleanup
+        toast._timeouts = [showTimeout, removeTimeout];
+    }
+
+    showDevMenu() {
+        // Check if dev menu already exists
+        if (document.getElementById('dev-menu')) return;
+
+        const menu = document.createElement('div');
+        menu.id = 'dev-menu';
+        menu.className = 'dev-menu';
+        menu.innerHTML = `
+            <div class="dev-menu-container">
+                <div class="dev-menu-header">
+                    <h2>🛠️ Developer Menu</h2>
+                    <button id="dev-menu-close" class="dev-menu-close">×</button>
+                </div>
+                <div class="dev-menu-content">
+                    <div class="dev-section">
+                        <h3>Currency</h3>
+                        <button class="dev-button" id="dev-add-money-1k">Add 1K Money</button>
+                        <button class="dev-button" id="dev-add-money-1m">Add 1M Money</button>
+                        <button class="dev-button" id="dev-add-money-1b">Add 1B Money</button>
+                        <button class="dev-button" id="dev-max-money">Max Money</button>
+                    </div>
+                    <div class="dev-section">
+                        <h3>Upgrades & Boosters</h3>
+                        <button class="dev-button" id="dev-unlock-all-upgrades">Unlock All Upgrades</button>
+                        <button class="dev-button" id="dev-max-click">Max Click Value</button>
+                        <button class="dev-button" id="dev-max-auto">Max Auto Clickers</button>
+                    </div>
+                    <div class="dev-section">
+                        <h3>Planets</h3>
+                        <button class="dev-button" id="dev-unlock-all-planets">Unlock All Planets</button>
+                    </div>
+                    <div class="dev-section">
+                        <h3>Achievements</h3>
+                        <button class="dev-button" id="dev-unlock-all-achievements">Unlock All Achievements</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(menu);
+        
+        // Add event listeners
+        document.getElementById('dev-menu-close').addEventListener('click', () => this.hideDevMenu());
+        document.getElementById('dev-add-money-1k').addEventListener('click', () => {
+            this.gameState.addMoney(1000);
+            this.showToast('Added 1K money', 'success');
+        });
+        document.getElementById('dev-add-money-1m').addEventListener('click', () => {
+            this.gameState.addMoney(1000000);
+            this.showToast('Added 1M money', 'success');
+        });
+        document.getElementById('dev-add-money-1b').addEventListener('click', () => {
+            this.gameState.addMoney(1000000000);
+            this.showToast('Added 1B money', 'success');
+        });
+        document.getElementById('dev-max-money').addEventListener('click', () => {
+            this.gameState.addMoney(999999999999);
+            this.showToast('Added max money', 'success');
+        });
+        document.getElementById('dev-unlock-all-upgrades').addEventListener('click', () => {
+            this.unlockAllUpgrades();
+            this.showToast('Unlocked all upgrades', 'success');
+        });
+        document.getElementById('dev-max-click').addEventListener('click', () => {
+            const state = this.gameState.getCurrentPlanetState();
+            state.currencyPerClick = 1000000;
+            this.showToast('Maxed click value', 'success');
+        });
+        document.getElementById('dev-max-auto').addEventListener('click', () => {
+            const state = this.gameState.getCurrentPlanetState();
+            state.currencyPerSecond = 1000000;
+            this.showToast('Maxed auto income', 'success');
+        });
+        document.getElementById('dev-unlock-all-planets').addEventListener('click', () => {
+            this.unlockAllPlanets();
+            this.showToast('Unlocked all planets', 'success');
+        });
+        document.getElementById('dev-unlock-all-achievements').addEventListener('click', () => {
+            this.unlockAllAchievements();
+            this.showToast('Unlocked all achievements', 'success');
+        });
+    }
+
+    hideDevMenu() {
+        const menu = document.getElementById('dev-menu');
+        if (menu) {
+            menu.remove();
+        }
+    }
+
+    unlockAllUpgrades() {
+        // Get all upgrades for current planet
+        const upgrades = this.planetManager.getPlanetUpgrades(this.gameState.currentPlanet);
+        upgrades.forEach(upgrade => {
+            if (!this.gameState.hasUpgrade(upgrade.id)) {
+                this.gameState.purchaseUpgrade(upgrade.id);
+                this.upgradeManager.applyUpgradeEffect(upgrade);
+            }
+        });
+        this.upgradeManager.renderUpgrades();
+    }
+
+    unlockAllPlanets() {
+        const planetOrder = ['earth', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+        planetOrder.forEach(planetId => {
+            if (!this.gameState.unlockedPlanets.has(planetId)) {
+                this.gameState.unlockedPlanets.add(planetId);
+                this.gameState.initializePlanetState(planetId);
+            }
+        });
+        this.planetManager.createWarpMenu();
+    }
+
+    unlockAllAchievements() {
+        this.achievementManager.achievements.forEach(achievement => {
+            if (!this.achievementManager.isUnlocked(achievement.id)) {
+                this.achievementManager.unlockAchievement(achievement.id);
+            }
+        });
+        this.updateAchievementProgress();
     }
 }
 

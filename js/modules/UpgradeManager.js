@@ -71,7 +71,14 @@ export class UpgradeManager {
     }
 
     purchaseUpgrade(upgradeId) {
-        const upgradesToSearch = this.gameState.currentPlanet === 'earth' ? this.upgrades : this.marsUpgrades;
+        // Use PlanetManager if available, otherwise fall back to legacy
+        let upgradesToSearch;
+        if (this.planetManager) {
+            upgradesToSearch = this.planetManager.getPlanetUpgrades(this.gameState.currentPlanet);
+        } else {
+            upgradesToSearch = this.gameState.currentPlanet === 'earth' ? this.upgrades : this.marsUpgrades;
+        }
+        
         const upgrade = upgradesToSearch.find(u => u.id === upgradeId);
         if (!upgrade) return;
 
@@ -118,7 +125,13 @@ export class UpgradeManager {
     }
 
     updateUpgradeButtons() {
-        const upgradesToCheck = this.gameState.currentPlanet === 'earth' ? this.upgrades : this.marsUpgrades;
+        // Use PlanetManager if available, otherwise fall back to legacy
+        let upgradesToCheck;
+        if (this.planetManager) {
+            upgradesToCheck = this.planetManager.getPlanetUpgrades(this.gameState.currentPlanet);
+        } else {
+            upgradesToCheck = this.gameState.currentPlanet === 'earth' ? this.upgrades : this.marsUpgrades;
+        }
         
         upgradesToCheck.forEach(upgrade => {
             const card = this.upgradeElements.get(upgrade.id);
